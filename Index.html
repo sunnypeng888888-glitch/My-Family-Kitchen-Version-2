@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#f5f3eb">
+<title>My Family Kitchen</title>
+<style>
+:root{--bg:#f5f3eb;--card:#fffefa;--green:#52765c;--pale:#e4eee2;--text:#29372d;--muted:#788078;--line:#e5e3da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;font-size:15px}
+header{padding:23px 18px;background:linear-gradient(135deg,#e1eddf,#f5f3eb)}
+header small{color:var(--green);font-weight:bold;letter-spacing:1px}
+h1{font-size:25px;margin:7px 0}h2{font-size:18px;margin:0 0 14px}h3{font-size:15px;margin:0 0 7px}
+p{line-height:1.55}.muted{color:var(--muted);font-size:13px}
+main{max-width:720px;margin:auto;padding:12px 13px 95px}
+nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;background:var(--bg);padding:9px 0;z-index:5}
+nav button{flex:1;min-width:max-content;background:#e8e6dd;color:var(--muted);border-radius:22px}
+nav button.active{background:var(--green);color:white}
+button{border:0;padding:11px 13px;border-radius:11px;background:var(--green);color:white;font:inherit;font-weight:600}
+button.secondary{background:var(--pale);color:var(--text)}
+button.danger{background:#f5e5e2;color:#98463b}
+button.small{padding:7px 9px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:15px;margin:0 0 12px}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.field{margin-bottom:10px;min-width:0}.field.full{grid-column:1/-1}
+label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}
+input,select,textarea{width:100%;min-width:0;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font:inherit}
+textarea{min-height:76px;resize:vertical}
+.row{display:flex;gap:8px;align-items:center}.between{justify-content:space-between}.grow{flex:1;min-width:0}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.stat{background:var(--pale);border-radius:13px;padding:12px}.stat b{display:block;font-size:21px;margin-top:5px}
+.item{display:flex;gap:10px;padding:12px 0;border-top:1px solid var(--line);align-items:flex-start}
+.item:first-child{border-top:0}.thumb{width:60px;height:60px;object-fit:cover;border-radius:10px;background:#eee9dd;flex-shrink:0}
+.pill{display:inline-block;background:#eeede5;padding:4px 8px;border-radius:20px;font-size:12px;color:var(--muted);margin:2px}
+.empty{text-align:center;color:var(--muted);padding:20px 5px}
+.notice{padding:12px;background:#fff0d8;border-radius:12px;color:#73562d;font-size:13px;line-height:1.6;margin-bottom:12px}
+.check{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}
+.check input{width:auto}.done{text-decoration:line-through;color:var(--muted)}
+footer{font-size:12px;color:var(--muted);line-height:1.6;padding:8px}
+@media(min-width:560px){.stats{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <small>MY FAMILY KITCHEN</small>
+  <h1>我的家庭食谱 🥕</h1>
+  <div class="muted">记录家常菜，让每一天吃得更有计划。</div>
+</header>
+<main>
+<nav>
+<button class="active" data-page="home">首页</button>
+<button data-page="recipes">食谱</button>
+<button data-page="diary">饮食日记</button>
+<button data-page="plan">每周菜单</button>
+<button data-page="shop">购物清单</button>
+</nav>
+
+<section id="home" class="page active">
+<div class="card">
+<div class="row between"><h2>今天的家庭饮食</h2><button onclick="go('diary')">＋ 记一餐</button></div>
+<p class="muted" id="today"></p>
+<div class="stats">
+<div class="stat">今日记录<b id="mealCount">0</b></div>
+<div class="stat">估算热量<b id="kcal">—</b></div>
+<div class="stat">蛋白质<b id="protein">—</b></div>
+<div class="stat">我的食谱<b id="recipeCount">0</b></div>
+</div>
+</div>
+<div class="card">
+<h2>家庭成员</h2>
+<div class="grid">
+<div class="field"><label>成员 1</label><input id="m0" value="我" onchange="members()"></div>
+<div class="field"><label>成员 2</label><input id="m1" value="孩子 1" onchange="members()"></div>
+<div class="field"><label>成员 3</label><input id="m2" value="孩子 2" onchange="members()"></div>
+</div>
+</div>
+<div class="card">
+<h2>最近添加的食谱</h2><div id="recent"></div>
+</div>
+<div class="card">
+<h2>数据备份</h2>
+<p class="muted">建议定期导出备份，换手机或清除浏览器数据前尤其重要。</p>
+<div class="actions">
+<button onclick="backup()">导出 JSON 备份</button>
+<label style="background:var(--pale);padding:11px;border-radius:10px">导入备份<input type="file" accept=".json,application/json" onchange="restore(event)" hidden></label>
+</div>
+</div>
+<div class="notice">注意：资料保存在本机浏览器，不会自动云端同步。营养信息需手动输入；本原型不会自动识别照片或自动分析混合菜的营养。</div>
+</section>
+
+<section id="recipes" class="page">
+<div class="card">
+<h2 id="formTitle">添加一道食谱</h2>
+<form id="recipeForm">
+<input type="hidden" id="rid">
+<div class="grid">
+<div class="field full"><label>食谱名称 *</label><input id="rname" required placeholder="例如：牛肉炒彩椒"></div>
+<div class="field"><label>分类</label><select id="rcat"><option>主菜</option><option>早餐</option><option>午餐</option><option>晚餐</option><option>汤</option><option>零食</option><option>其他</option></select></div>
+<div class="field"><label>总份数</label><input id="rserv" type="number" min="1" value="3"></div>
+<div class="field"><label>准备时间（分钟）</label><input id="rprep" type="number" min="0" value="10"></div>
+<div class="field"><label>烹饪时间（分钟）</label><input id="rcook" type="number" min="0" value="15"></div>
+<div class="field full"><label>食材（每行一项：名称, 数量）</label><textarea id="ring" placeholder="牛肉, 300 g&#10;彩椒, 200 g&#10;食用油, 15 ml"></textarea></div>
+<div class="field full"><label>制作步骤</label><textarea id="rsteps" placeholder="1. 准备食材……"></textarea></div>
+<div class="field full"><label>备注</label><textarea id="rnotes" placeholder="孩子喜欢吗？下次怎么改？"></textarea></div>
+<div class="field full"><label>食谱照片（可选）</label><input id="rphoto" type="file" accept="image/*" capture="environment"><div class="muted">建议选择较小的照片，避免占满浏览器存储。</div></div>
+</div>
+<div class="actions"><button type="submit">保存食谱</button><button class="secondary" type="button" onclick="resetRecipe()">清空</button></div>
+</form>
+</div>
+<div class="card">
+<h2>我的食谱</h2>
+<input id="search" placeholder="搜索食谱或食材…" oninput="renderRecipes()">
+<div id="recipeList" style="margin-top:8px"></div>
+</div>
+</section>
+
+<section id="diary" class="page">
+<div class="card">
+<h2>记录一餐</h2>
+<form id="diaryForm">
+<div class="grid">
+<div class="field"><label>日期</label><input type="date" id="ddate" required></div>
+<div class="field"><label>餐次</label><select id="dmeal"><option>早餐</option><option>午餐</option><option>晚餐</option><option>加餐</option></select></div>
+<div class="field"><label>家庭成员</label><select id="dmember"></select></div>
+<div class="field"><label>食物名称 *</label><input id="dfood" required placeholder="例如：牛肉炒饭"></div>
+<div class="field"><label>食用份量（克）</label><input id="dweight" type="number" min="0"></div>
+<div class="field"><label>热量（kcal）</label><input id="dkcal" type="number" min="0" placeholder="可留空"></div>
+<div class="field"><label>蛋白质（g）</label><input id="dprotein" type="number" min="0" step=".1"></div>
+<div class="field"><label>碳水化合物（g）</label><input id="dcarbs" type="number" min="0" step=".1"></div>
+<div class="field full"><label>备注</label><textarea id="dnotes" placeholder="食材、份量、剩菜等"></textarea></div>
+</div>
+<button type="submit">保存饮食记录</button>
+</form>
+</div>
+<div class="card">
+<div class="row between"><h2>每日记录</h2><input type="date" id="dfilter" onchange="renderDiary()" style="max-width:160px"></div>
+<div id="diarySummary" class="muted"></div><div id="diaryList"></div>
+</div>
+</section>
+
+<section id="plan" class="page">
+<div class="card">
+<h2>每周菜单</h2>
+<div class="field"><label>选择本周周一日期</label><input type="date" id="week" onchange="renderPlan()"></div>
+<div id="planGrid"></div>
+<button onclick="makeShopping()">从菜单生成购物清单</button>
+</div>
+<div class="notice">输入的菜名与已保存食谱名称完全一致时，才会把该食谱食材加入购物清单。手写菜名不会自动识别食材。</div>
+</section>
+
+<section id="shop" class="page">
+<div class="card">
+<h2>购物清单</h2>
+<div class="grid">
+<div class="field"><label>商品名称</label><input id="gname" placeholder="胡萝卜"></div>
+<div class="field"><label>数量</label><input id="gqty" placeholder="500 g / 1 袋"></div>
+<div class="field"><label>预计价格（AUD）</label><input id="gprice" type="number" min="0" step=".01"></div>
+<div class="field"><label>分类</label><select id="gcat"><option>蔬果</option><option>肉类/海鲜</option><option>乳制品/鸡蛋</option><option>米面/谷物</option><option>调味料/罐头</option><option>冷冻食品</option><option>其他</option></select></div>
+</div>
+<button onclick="addGrocery()">＋ 添加商品</button>
+<hr>
+<div class="row between"><span id="gsummary" class="muted"></span><button class="secondary" onclick="clearChecked()">清除已购买</button></div>
+<div id="glist"></div>
+</div>
+<div class="card">
+<h2>每周特价记录</h2>
+<p class="muted">手动记录 Costco、Woolworths、Coles 的优惠。本版本不会自动抓取实时价格。</p>
+<div class="grid">
+<div class="field"><label>商店</label><select id="sstore"><option>Costco Australia</option><option>Woolworths</option><option>Coles</option><option>其他</option></select></div>
+<div class="field"><label>商品名称</label><input id="sproduct"></div>
+<div class="field"><label>规格</label><input id="ssize" placeholder="例如 1 kg"></div>
+<div class="field"><label>特价 AUD</label><input id="sprice" type="number" min="0" step=".01"></div>
+<div class="field"><label>优惠到期日期</label><input id="sexpiry" type="date"></div>
+<div class="field full"><label>商品链接（可选）</label><input id="surl" type="url" placeholder="https://…"></div>
+</div>
+<button onclick="addSpecial()">保存优惠</button>
+<div id="specials"></div>
+</div>
+</section>
+
+<footer>My Family Kitchen · 单文件 HTML 原型 · AUD / 克 / 毫升<br>不是医疗工具；营养数据请自行核对。</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const KEY='myFamilyKitchen_v1';
+let data={recipes:[],diary:[],members:['我','孩子 1','孩子 2'],plan:{},groceries:[],specials:[]};
+try{data={...data,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){alert('浏览器存储空间可能不足。请导出备份，并减少照片数量或大小。')}}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function today(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='home')home();if(id==='recipes')renderRecipes();if(id==='diary')renderDiary();if(id==='plan')renderPlan();if(id==='shop'){renderGroceries();renderSpecials()}window.scrollTo(0,0)}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
+function members(){data.members=[0,1,2].map(i=>$('m'+i).value.trim()||['我','孩子 1','孩子 2'][i]);save();memberOptions()}
+function memberOptions(){$('dmember').innerHTML=data.members.map((x,i)=>`<option value="${i}">${esc(x)}</option>`).join('')}
+function home(){let t=today(),a=data.diary.filter(x=>x.date===t),k=a.filter(x=>x.kcal!==null),p=a.filter(x=>x.protein!==null);$('today').textContent=t;$('mealCount').textContent=a.length;$('kcal').textContent=k.length?Math.round(k.reduce((s,x)=>s+x.kcal,0)):'—';$('protein').textContent=p.length?p.reduce((s,x)=>s+x.protein,0).toFixed(1)+' g':'—';$('recipeCount').textContent=data.recipes.length;$('recent').innerHTML=data.recipes.slice(0,3).map(recipeHTML).join('')||'<div class="empty">还没有食谱。去“食谱”添加第一道菜吧。</div>'}
+function parseIng(s){return s.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{let a=x.split(',');return {name:a[0].trim(),qty:a.slice(1).join(',').trim()}})}
+function ingString(a){return (a||[]).map(x=>x.name+(x.qty?', '+x.qty:'')).join('\n')}
+function recipeHTML(r){return `<div class="item">${r.photo?`<img class="thumb" src="${r.photo}">`:'<div class="thumb" style="display:grid;place-items:center;font-size:25px">🍲</div>'}<div class="grow"><h3>${esc(r.name)}</h3><span class="pill">${esc(r.cat)}</span><span class="pill">${r.serv} 份</span><div class="muted">${(r.ing||[]).length} 项食材 · 准备 ${r.prep} 分钟 · 烹饪 ${r.cook} 分钟</div><div class="actions"><button class="secondary small" onclick="editRecipe('${r.id}')">编辑</button><button class="secondary small" onclick="toDiary('${r.id}')">记入日记</button><button class="danger small" onclick="delRecipe('${r.id}')">删除</button></div></div></div>`}
+$('rphoto').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;if(f.size>900000){alert('照片建议小于 900 KB，以免浏览器存储空间不足。');e.target.value='';return}let rd=new FileReader();rd.onload=()=>{window.newPhoto=rd.result};rd.readAsDataURL(f)});
+function resetRecipe(){$('recipeForm').reset();$('rid').value='';$('rserv').value=3;$('rprep').value=10;$('rcook').value=15;$('formTitle').textContent='添加一道食谱';window.newPhoto=''}
+$('recipeForm').onsubmit=e=>{e.preventDefault();let id=$('rid').value||String(Date.now()),old=data.recipes.find(x=>x.id===id);let r={id,name:$('rname').value.trim(),cat:$('rcat').value,serv:+$('rserv').value||1,prep:+$('rprep').value||0,cook:+$('rcook').value||0,ing:parseIng($('ring').value),steps:$('rsteps').value,notes:$('rnotes').value,photo:window.newPhoto||(old&&old.photo)||''};let i=data.recipes.findIndex(x=>x.id===id);i>=0?data.recipes[i]=r:data.recipes.unshift(r);save();resetRecipe();renderRecipes();home();alert('食谱已保存。')};
+function renderRecipes(){let q=($('search').value||'').toLowerCase(),a=data.recipes.filter(r=>(r.name+' '+r.cat+' '+ingString(r.ing)).toLowerCase().includes(q));$('recipeList').innerHTML=a.map(recipeHTML).join('')||'<div class="empty">没有找到食谱。</div>'}
+function editRecipe(id){let r=data.recipes.find(x=>x.id===id);if(!r)return;$('rid').value=r.id;$('rname').value=r.name;$('rcat').value=r.cat;$('rserv').value=r.serv;$('rprep').value=r.prep;$('rcook').value=r.cook;$('ring').value=ingString(r.ing);$('rsteps').value=r.steps||'';$('rnotes').value=r.notes||'';window.newPhoto='';$('formTitle').textContent='编辑食谱';window.scrollTo(0,0)}
+function delRecipe(id){if(confirm('确定删除这道食谱吗？')){data.recipes=data.recipes.filter(x=>x.id!==id);save();renderRecipes();home();renderPlan()}}
+function toDiary(id){let r=data.recipes.find(x=>x.id===id);if(!r)return;go('diary');$('dfood').value=r.name;$('dnotes').value='来自食谱：'+r.name}
+$('diaryForm').onsubmit=e=>{e.preventDefault();let val=id=>$(id).value===''?null:Number($(id).value);data.diary.unshift({id:String(Date.now()),date:$('ddate').value,meal:$('dmeal').value,member:+$('dmember').value,food:$('dfood').value.trim(),weight:val('dweight'),kcal:val('dkcal'),protein:val('dprotein'),carbs:val('dcarbs'),notes:$('dnotes').value});save();$('dfood').value='';$('dweight').value='';$('dkcal').value='';$('dprotein').value='';$('dcarbs').value='';$('dnotes').value='';renderDiary();home();alert('记录已保存。')};
+function renderDiary(){let date=$('dfilter').value||today(),a=data.diary.filter(x=>x.date===date),k=a.filter(x=>x.kcal!==null),p=a.filter(x=>x.protein!==null);$('diarySummary').textContent=`${date} · ${a.length} 条 · 热量 ${k.length?k.reduce((s,x)=>s+x.kcal,0)+' kcal':'无数据'} · 蛋白质 ${p.length?p.reduce((s,x)=>s+x.protein,0).toFixed(1)+' g':'无数据'}`;$('diaryList').innerHTML=a.map(x=>`<div class="item"><div class="grow"><h3>${esc(x.meal)} · ${esc(x.food)}</h3><span class="pill">${esc(data.members[x.member]||'家庭成员')}</span>${x.weight!==null?`<span class="pill">${x.weight} g</span>`:''}<div class="muted">热量：${x.kcal===null?'无数据':x.kcal+' kcal'} · 蛋白质：${x.protein===null?'无数据':x.protein+' g'} · 碳水：${x.carbs===null?'无数据':x.carbs+' g'}</div>${x.notes?`<p class="muted">${esc(x.notes)}</p>`:''}<button class="danger small" onclick="delDiary('${x.id}')">删除</button></div></div>`).join('')||'<div class="empty">这一天还没有记录。</div>'}
+function delDiary(id){data.diary=data.diary.filter(x=>x.id!==id);save();renderDiary();home()}
+function shift(d,n){let x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`}
+function monday(d){let x=new Date(d+'T12:00:00');x.setDate(x.getDate()-((x.getDay()+6)%7));return shift(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'),0)}
+function renderPlan(){let start=$('week').value||monday(today());$('week').value=start;let meals=['早餐','午餐','晚餐','加餐'],html='';for(let d=0;d<7;d++){let date=shift(start,d);html+=`<div style="background:#f5f3eb;border-radius:12px;padding:12px;margin:9px 0"><h3>${['周一','周二','周三','周四','周五','周六','周日'][d]} · ${date}</h3>`;meals.forEach(m=>{let key=date+'|'+m;html+=`<div class="field"><label>${m}</label><input data-plan="${key}" value="${esc(data.plan[key]||'')}" placeholder="填写菜名或食谱名称"></div>`});html+='</div>'}$('planGrid').innerHTML=html;$('planGrid').querySelectorAll('[data-plan]').forEach(el=>el.onchange=()=>{data.plan[el.dataset.plan]=el.value;save()})}
+function guessCat(n){if(/牛|鸡|猪|羊|鱼|虾|肉/.test(n))return'肉类/海鲜';if(/奶|蛋|芝士|奶酪/.test(n))return'乳制品/鸡蛋';if(/米|面|燕麦/.test(n))return'米面/谷物';if(/菜|椒|胡萝卜|洋葱|番茄|果/.test(n))return'蔬果';return'其他'}
+function makeShopping(){document.querySelectorAll('[data-plan]').forEach(el=>data.plan[el.dataset.plan]=el.value);let start=$('week').value,end=shift(start,7),map={};Object.keys(data.plan).forEach(k=>{let [d]=k.split('|');if(d>=start&&d<end){let name=data.plan[k].trim().toLowerCase(),r=data.recipes.find(x=>x.name.toLowerCase()===name);if(r)(r.ing||[]).forEach(i=>{let key=i.name.toLowerCase();if(!map[key])map[key]={name:i.name,qty:[],cat:guessCat(i.name)};if(i.qty)map[key].qty.push(i.qty)})}});let n=0;Object.values(map).forEach(x=>{data.groceries.push({id:String(Date.now()+n++),name:x.name,qty:x.qty.join(' + ')||'按食谱准备',price:null,cat:x.cat,checked:false})});save();renderGroceries();go('shop');alert(n?`已添加 ${n} 项食材。数量仅作简单汇总，请购物前核对。`:'未找到匹配的食谱。请检查菜单菜名是否与食谱名称一致。')}
+function addGrocery(){let name=$('gname').value.trim();if(!name){alert('请填写商品名称');return}data.groceries.push({id:String(Date.now()),name,qty:$('gqty').value.trim(),price:$('gprice').value===''?null:+$('gprice').value,cat:$('gcat').value,checked:false});save();$('gname').value='';$('gqty').value='';$('gprice').value='';renderGroceries()}
+function renderGroceries(){let a=data.groceries;$('gsummary').textContent=`待购买 ${a.filter(x=>!x.checked).length} 项 · 已购买 ${a.filter(x=>x.checked).length} 项`;$('glist').innerHTML=a.map(x=>`<div class="check"><input type="checkbox" ${x.checked?'checked':''} onchange="toggleG('${x.id}',this.checked)"><span class="grow ${x.checked?'done':''}"><b>${esc(x.name)}</b><div class="muted">${esc(x.qty||'数量待定')} · ${esc(x.cat)}${x.price!==null?' · $'+Number(x.price).toFixed(2):''}</div></span><button class="danger small" onclick="delG('${x.id}')">移除</button></div>`).join('')||'<div class="empty">购物清单为空。</div>'}
+function toggleG(id,v){let x=data.groceries.find(x=>x.id===id);if(x)x.checked=v;save();renderGroceries()}
+function delG(id){data.groceries=data.groceries.filter(x=>x.id!==id);save();renderGroceries()}
+function clearChecked(){data.groceries=data.groceries.filter(x=>!x.checked);save();renderGroceries()}
+function addSpecial(){let product=$('sproduct').value.trim();if(!product){alert('请填写商品名称');return}let url=$('surl').value.trim();if(url&&!/^https?:\/\//i.test(url)){alert('链接需以 https:// 或 http:// 开头');return}data.specials.unshift({id:String(Date.now()),store:$('sstore').value,product,size:$('ssize').value,price:$('sprice').value===''?null:+$('sprice').value,expiry:$('sexpiry').value,url});save();$('sproduct').value='';$('ssize').value='';$('sprice').value='';$('sexpiry').value='';$('surl').value='';renderSpecials()}
+function renderSpecials(){$('specials').innerHTML=data.specials.map(x=>`<div class="item"><div class="grow"><b>${esc(x.product)}</b> <span class="pill">${esc(x.store)}</span><div class="muted">${esc(x.size)} · ${x.price===null?'价格未填':'$'+x.price}${x.expiry?' · 到期 '+esc(x.expiry):''}</div>${x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener">打开优惠链接 ↗</a>`:''}</div><button class="danger small" onclick="delSpecial('${x.id}')">删除</button></div>`).join('')||'<div class="empty">还没有特价记录。</div>'}
+function delSpecial(id){data.specials=data.specials.filter(x=>x.id!==id);save();renderSpecials()}
+function backup(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-family-kitchen-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function restore(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.recipes)||!Array.isArray(x.diary))throw Error('文件格式不正确');if(confirm('导入会替换当前数据，确定继续吗？')){data={...data,...x};save();init();alert('导入成功')}}catch(err){alert('无法导入：'+err.message)}e.target.value=''};r.readAsText(f)}
+function init(){for(let i=0;i<3;i++)$('m'+i).value=data.members[i]||['我','孩子 1','孩子 2'][i];memberOptions();$('ddate').value=today();$('dfilter').value=today();$('week').value=monday(today());home();renderRecipes();renderDiary();renderPlan();renderGroceries();renderSpecials()}
+init();
+</script>
+</body>
+</html>
